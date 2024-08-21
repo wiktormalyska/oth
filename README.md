@@ -19,3 +19,8 @@ See [here](https://ulissemini.github.io/oth/) for a demo
 
 1. [Create a repo using the template](https://github.com/UlisseMini/oth/generate)
 2. Go to Settings -> Pages and set "deploy branch" to gh-pages and path to be the root `/`
+`
+
+### Updates
+
+1. Updated some npm packages
