@@ -15,7 +15,7 @@
     "katex": "^0.15.2",
     "klaw": "^4.0.1",
     "rehype-document": "^6.0.1",
-    "rehype-highlight": "^5.0.2",
+    "rehype-highlight": "7.0.0",
     "rehype-katex": "^6.0.2",
     "rehype-raw": "^6.1.1",
     "rehype-stringify": "^9.0.3",
