@@ -24,7 +24,7 @@
     "remark-rehype": "11.1.0",
     "remark-wiki-link-plus": "1.1.1",
     "to-vfile": "8.0.0",
-    "unified": "11.0.5",
+    "unified": "10.1.1",
     "unist-util-is": "6.0.0",
     "unist-util-visit": "5.0.0",
     "vfile-reporter": "8.1.1"
