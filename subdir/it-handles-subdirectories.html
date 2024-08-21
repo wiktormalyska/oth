@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>It handles subdirectories</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../highlight.css">
+<link rel="stylesheet" href="../katex.min.css">
+</head>
+<body>
+<p>This might seem trivial, but having the stylesheet be <code>/styles.css</code> doesn't work on github pages, since it tries to fetch <code>username.github.io/styles.css</code> instead of <code>username.github.io/repo/styles.css</code>.</p>
+<p>I solve this by making all stylesheet links relative. Since I don't want the user to have to configure their repo root (I could probably get it from a variable in actions, but that's cursed)</p>
+<p>Links also work, see <a class="internal new" href="./another">./Another</a> or return to <a class="internal new" href="..">The homepage</a></p>
+</body>
+</html>
