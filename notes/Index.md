@@ -7,6 +7,8 @@ title: "Hello!"
 
 This is an obsidian note, it can link to other notes via wikilinks (see: [[Configuration is bloat]] and [[It handles subdirectories]])
 
+Check also [[subdir with spaces/File with spaces]] to see how it handles spaces in filenames.
+
 We can do code highlighting
 
 ```python

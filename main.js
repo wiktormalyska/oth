@@ -57,7 +57,14 @@ async function compile(file) {
 
   // Relative path to root, needed to handle the root being user.github.io/project
   // notes/a/b.md => depth = 1, notes/a.md => depth = 0
-  const depth = file.path.split("/").reverse().lastIndexOf("notes") - 1;
+  // if path is a Windows path, replace backslashes with forward slashes
+  if (file.path.includes("\\"))
+  {
+    file.path = file.path.replace(/\\/g, "/");
+  }
+  var depth = file.path.split("/");
+  depth = depth.reverse();
+  depth = depth.lastIndexOf("notes") - 1;
   const root = "../".repeat(depth);
 
   return await unified()
@@ -86,8 +93,34 @@ async function compile(file) {
     .then((file) => {
       if (file.messages.length > 0)
         console.error(reporter(file, { quiet: true }));
+      file = fixLinks(file);
       return file;
     });
+}
+
+function fixLinks(html) {
+  var text = html.value;
+  // Regular expression to find local links
+  const regex = /<a[^>]*>/g;
+  var allLinks = Array.from(text.matchAll(regex));
+  allLinks.forEach((link) => {
+    const linkRegex = /(?<=href=")[^"]*(?=")/g
+    const href = Array.from(link[0].matchAll(linkRegex));
+    if (href) {
+      if (!href[0][0].startsWith("http") && href[0][0].includes("/")) {
+        const dir = href[0][0].split("/");
+        if(dir.length>1) {
+          for(let i = 0; i < dir.length-1; i++) {
+            if(dir[i].includes("-")){
+                dir[i] = dir[i].replace("-", " ");
+            }
+          }
+        }
+      }
+    }
+  });
+  html.value = text
+  return html;
 }
 
 function remarkRunCode() {
