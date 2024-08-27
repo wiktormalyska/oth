@@ -18,6 +18,38 @@ import { reporter } from "vfile-reporter";
 import { visit } from "unist-util-visit";
 main();
 
+function renameDirectoriesToLowercase(dirPath) {
+  const ignoreDirs = ['.git', '.github', 'fonts'];
+  // Read all items in the current directory
+  const items = fs.readdirSync(dirPath);
+
+  // Iterate over each item in the directory
+  items.forEach(item => {
+    const fullPath = path.join(dirPath, item);
+
+    // Check if the item is a directory
+    if (fs.statSync(fullPath).isDirectory()) {
+      if (ignoreDirs.includes(item)) {
+        return; // Skip this directory
+      }
+      // Get the lowercase version of the directory name
+      const lowerCaseName = item.toLowerCase();
+
+      // Determine the new path after renaming
+      const newFullPath = path.join(dirPath, lowerCaseName);
+
+      // Rename the directory if the name is different
+      if (fullPath !== newFullPath) {
+        fs.renameSync(fullPath, newFullPath);
+      }
+
+      // Recursively process the renamed directory
+      console.log("./"+newFullPath)
+      renameDirectoriesToLowercase("./"+newFullPath);
+    }
+  });
+}
+
 async function main() {
 
   for await (const file of klaw("./notes")) {
@@ -37,6 +69,7 @@ async function main() {
     "node_modules/highlight.js/styles/default.css",
     "out/highlight.css"
   );
+  await renameDirectoriesToLowercase("./out");
 }
 
 async function compileAndWrite(markdownVFile) {
