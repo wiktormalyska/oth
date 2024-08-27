@@ -162,7 +162,7 @@ function fixLinks(html) {
             }
           }
           for (let i = 0; i < parts.length; i++) {
-            if (fixedLink === undefined) {
+            if (fixedLink == undefined) {
               fixedLink = link[0].replace(parts[i][0], parts[i][1])
             } else {
               fixedLink = fixedLink.replace(parts[i][0], parts[i][1])
