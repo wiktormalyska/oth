@@ -101,8 +101,9 @@ async function compile(file) {
 function fixLinks(html) {
   var text = html.value;
   // Regular expression to find local links
-  const regex = /<a[^>]*>/g;
+  const regex = /<a [^>]*>/g;
   var allLinks = Array.from(text.matchAll(regex));
+  var fixedLinks = [];
   allLinks.forEach((link) => {
     const linkRegex = /(?<=href=")[^"]*(?=")/g
     const href = Array.from(link[0].matchAll(linkRegex));
@@ -112,13 +113,19 @@ function fixLinks(html) {
         if(dir.length>1) {
           for(let i = 0; i < dir.length-1; i++) {
             if(dir[i].includes("-")){
-                dir[i] = dir[i].replace("-", " ");
+                var fixedPart = dir[i].replaceAll("-", " ");
+                var fixedLink = link[0].replace(dir[0], fixedPart);
+              fixedLinks.push([link[0],fixedLink]);
             }
           }
         }
       }
     }
   });
+  fixedLinks.forEach(link => {
+    text = text.replaceAll(link[0], link[1]);
+  })
+
   html.value = text
   return html;
 }
