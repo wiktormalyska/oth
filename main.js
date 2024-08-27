@@ -18,61 +18,6 @@ import { reporter } from "vfile-reporter";
 import { visit } from "unist-util-visit";
 main();
 
-async function* getAllDirectories(dir) {
-  const files = await fs.readdir(dir, { withFileTypes: true });
-
-  for (const file of files) {
-    const fullPath = path.join(dir, file.name);
-    if (file.isDirectory()) {
-      yield fullPath;
-      yield* getAllDirectories(fullPath); // Recursively yield subdirectories
-    }
-  }
-}
-
-async function renameDirectoriesToLowerCase(rootDir) {
-  const directories = [];
-  const ignoredDirectories = ['.git', 'node_modules', '.obsidian'];
-  // Collect all directories
-  for await (const dir of getAllDirectories(rootDir)) {
-    var isIgnored = false;
-    for(const ignoredDir of ignoredDirectories) {
-        if (dir.includes(ignoredDir)) {
-          isIgnored=true;
-          break;
-        }
-    }
-    isIgnored ? null : directories.push(dir);
-  }
-
-  // Sort directories by depth (deepest first)
-  directories.sort((a, b) => b.split(path.sep).length - a.split(path.sep).length);
-
-  // Rename directories
-  for (const dirPath of directories) {
-    const dirName = path.basename(dirPath);
-    const lowerCaseDirName = dirName.toLowerCase();
-
-    if (dirName !== lowerCaseDirName) {
-      const newDirPath = path.join(path.dirname(dirPath), lowerCaseDirName);
-
-      // Check if newDirPath already exists to avoid conflicts
-      try {
-        await fs.access(newDirPath);
-        console.log(`Skipping renaming ${dirPath} as ${newDirPath} already exists.`);
-      } catch {
-        // If newDirPath doesn't exist, proceed with renaming
-        try {
-          await fs.rename(dirPath, newDirPath);
-          console.log(`Renamed: ${dirPath} -> ${newDirPath}`);
-        } catch (renameErr) {
-          console.error(`Failed to rename ${dirPath} to ${newDirPath}:`, renameErr);
-        }
-      }
-    }
-  }
-}
-
 async function main() {
 
   for await (const file of klaw("./notes")) {
@@ -92,9 +37,6 @@ async function main() {
     "node_modules/highlight.js/styles/default.css",
     "out/highlight.css"
   );
-  await renameDirectoriesToLowerCase('./out').catch(err => {
-    console.error('An error occurred during directory renaming:', err);
-  });
 }
 
 async function compileAndWrite(markdownVFile) {
@@ -168,26 +110,33 @@ function fixLinks(html) {
     const href = Array.from(link[0].matchAll(linkRegex));
     if (href) {
       // If link is not local link and if is in sub dir
-      if (!href[0][0].startsWith("http") && href[0][0].includes("/")) {
+      if (!href[0][0].startsWith("http") && (href[0][0].includes("/") || href[0][0].includes("\\"))) {
         const dir = href[0][0].split("/");
         if(dir.length>1) {
           //Scan every sub dir in url without file name
+          var parts = []
+          var fixedLink
           for(let i = 0; i < dir.length-1; i++) {
             var fixedPart
-            var fixedLink
+
             //Fix white spaces and big letters
             if(dir[i].includes("-")) {
               //Replace "-" with " "
+              var part = dir[i]
               fixedPart = dir[i].replaceAll("-", " ")
-              fixedLink = link[0].replace(dir[0], fixedPart);
-            }
-            if(fixedLink == undefined) {
-              continue
-            }
-            console.log(fixedLink)
-            fixedLinks.push([link[0],fixedLink]);
 
+              parts.push([part, fixedPart])
+            }
           }
+          for (let i = 0; i < parts.length; i++) {
+            if (fixedLink === undefined) {
+              fixedLink = link[0].replace(parts[i][0], parts[i][1])
+            } else {
+              fixedLink = fixedLink.replace(parts[i][0], parts[i][1])
+            }
+          }
+          console.log(fixedLink)
+          fixedLinks.push([link[0],fixedLink]);
         }
       }
 
