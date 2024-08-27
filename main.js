@@ -100,28 +100,42 @@ async function compile(file) {
 
 function fixLinks(html) {
   var text = html.value;
-  // Regular expression to find local links
+  // Regular expression to a html tags
   const regex = /<a [^>]*>/g;
   var allLinks = Array.from(text.matchAll(regex));
   var fixedLinks = [];
   allLinks.forEach((link) => {
+    // Regular expression to extract link from a tag
     const linkRegex = /(?<=href=")[^"]*(?=")/g
     const href = Array.from(link[0].matchAll(linkRegex));
     if (href) {
+      // If link is not local link and if is in sub dir
       if (!href[0][0].startsWith("http") && href[0][0].includes("/")) {
         const dir = href[0][0].split("/");
         if(dir.length>1) {
+          //Scan every sub dir in url without file name
           for(let i = 0; i < dir.length-1; i++) {
+            var fixedPart
+            var fixedLink
+            //Fix white spaces and big letters
             if(dir[i].includes("-")){
-                var fixedPart = dir[i].replaceAll("-", " ");
-                var fixedLink = link[0].replace(dir[0], fixedPart);
-              fixedLinks.push([link[0],fixedLink]);
+              //Replace "-" with " " and set link to lowercase
+               fixedPart = dir[i].replaceAll("-", " ").toLowerCase();
+               fixedLink= link[0].replace(dir[0], fixedPart);
+            } else {
+              //Set link to lowercase
+              fixedPart = dir[i].toLowerCase();
+              fixedLink = link[0].replace(dir[0], fixedPart);
             }
+            fixedLinks.push([link[0],fixedLink]);
+            console.log(fixedLink)
           }
         }
       }
+
     }
   });
+  //Replace original html value with modified one
   fixedLinks.forEach(link => {
     text = text.replaceAll(link[0], link[1]);
   })

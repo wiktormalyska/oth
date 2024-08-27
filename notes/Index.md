@@ -7,7 +7,10 @@ title: "Hello!"
 
 This is an obsidian note, it can link to other notes via wikilinks (see: [[Configuration is bloat]] and [[It handles subdirectories]])
 
-Check also [[subdir with spaces/File with spaces]] to see how it handles spaces in filenames.
+Check [[subdir with spaces/File wIth spaces]] to see how it handles spaces in filenames.\
+(don't make sub dirs that has - in its name)
+
+Check also [[Subdir wItH bIgLeTtErS/File wITh bigLettErS]] to see that now subdirectories can have big letters
 
 We can do code highlighting
 
