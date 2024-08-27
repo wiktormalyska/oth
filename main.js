@@ -118,15 +118,16 @@ function fixLinks(html) {
             var fixedPart
             var fixedLink
             //Fix white spaces and big letters
-            if(dir[i].includes("-")){
+            if(dir[i].includes("-")) {
               //Replace "-" with " " and set link to lowercase
-               fixedPart = dir[i].replaceAll("-", " ").toLowerCase();
-               fixedLink= link[0].replace(dir[0], fixedPart);
-            } else {
-              //Set link to lowercase
-              fixedPart = dir[i].toLowerCase();
+              fixedPart = dir[i].replaceAll("-", " ")//.toLowerCase();
               fixedLink = link[0].replace(dir[0], fixedPart);
             }
+            // } else {
+            //   //Set link to lowercase
+            //   fixedPart = dir[i].toLowerCase();
+            //   fixedLink = link[0].replace(dir[0], fixedPart);
+            // }
             fixedLinks.push([link[0],fixedLink]);
             console.log(fixedLink)
           }
