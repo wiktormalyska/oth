@@ -16,10 +16,25 @@ import { unified } from "unified";
 import { is } from "unist-util-is";
 import { reporter } from "vfile-reporter";
 import { visit } from "unist-util-visit";
-
 main();
 
+
+async function renameDirectoriesToLowerCase() {
+  for await (const file of klaw('./out')) {
+    if (file.stats.isDirectory()) {
+      const dirName = path.basename(file.path);
+      const lowerCaseDirName = dirName.toLowerCase();
+      if (dirName !== lowerCaseDirName) {
+        const newDirPath = path.join(path.dirname(file.path), lowerCaseDirName);
+        await fs.rename(file.path, newDirPath);
+        console.log(`Renamed: ${file.path} -> ${newDirPath}`);
+      }
+    }
+  }
+}
+
 async function main() {
+
   for await (const file of klaw("./notes")) {
     if (path.extname(file.path) === ".md") {
       const markdownVFile = await read(file.path);
@@ -37,6 +52,7 @@ async function main() {
     "node_modules/highlight.js/styles/default.css",
     "out/highlight.css"
   );
+  renameDirectoriesToLowerCase().catch(console.error);
 }
 
 async function compileAndWrite(markdownVFile) {
@@ -119,15 +135,10 @@ function fixLinks(html) {
             var fixedLink
             //Fix white spaces and big letters
             if(dir[i].includes("-")) {
-              //Replace "-" with " " and set link to lowercase
-              fixedPart = dir[i].replaceAll("-", " ")//.toLowerCase();
+              //Replace "-" with " "
+              fixedPart = dir[i].replaceAll("-", " ")
               fixedLink = link[0].replace(dir[0], fixedPart);
             }
-            // } else {
-            //   //Set link to lowercase
-            //   fixedPart = dir[i].toLowerCase();
-            //   fixedLink = link[0].replace(dir[0], fixedPart);
-            // }
             fixedLinks.push([link[0],fixedLink]);
             console.log(fixedLink)
           }
