@@ -18,16 +18,56 @@ import { reporter } from "vfile-reporter";
 import { visit } from "unist-util-visit";
 main();
 
+async function* getAllDirectories(dir) {
+  const files = await fs.readdir(dir, { withFileTypes: true });
 
-async function renameDirectoriesToLowerCase() {
-  for await (const file of klaw('./out')) {
-    if (file.stats.isDirectory()) {
-      const dirName = path.basename(file.path);
-      const lowerCaseDirName = dirName.toLowerCase();
-      if (dirName !== lowerCaseDirName) {
-        const newDirPath = path.join(path.dirname(file.path), lowerCaseDirName);
-        await fs.rename(file.path, newDirPath);
-        console.log(`Renamed: ${file.path} -> ${newDirPath}`);
+  for (const file of files) {
+    const fullPath = path.join(dir, file.name);
+    if (file.isDirectory()) {
+      yield fullPath;
+      yield* getAllDirectories(fullPath); // Recursively yield subdirectories
+    }
+  }
+}
+
+async function renameDirectoriesToLowerCase(rootDir) {
+  const directories = [];
+  const ignoredDirectories = ['.git', 'node_modules', '.obsidian'];
+  // Collect all directories
+  for await (const dir of getAllDirectories(rootDir)) {
+    var isIgnored = false;
+    for(const ignoredDir of ignoredDirectories) {
+        if (dir.includes(ignoredDir)) {
+          isIgnored=true;
+          break;
+        }
+    }
+    isIgnored ? null : directories.push(dir);
+  }
+
+  // Sort directories by depth (deepest first)
+  directories.sort((a, b) => b.split(path.sep).length - a.split(path.sep).length);
+
+  // Rename directories
+  for (const dirPath of directories) {
+    const dirName = path.basename(dirPath);
+    const lowerCaseDirName = dirName.toLowerCase();
+
+    if (dirName !== lowerCaseDirName) {
+      const newDirPath = path.join(path.dirname(dirPath), lowerCaseDirName);
+
+      // Check if newDirPath already exists to avoid conflicts
+      try {
+        await fs.access(newDirPath);
+        console.log(`Skipping renaming ${dirPath} as ${newDirPath} already exists.`);
+      } catch {
+        // If newDirPath doesn't exist, proceed with renaming
+        try {
+          await fs.rename(dirPath, newDirPath);
+          console.log(`Renamed: ${dirPath} -> ${newDirPath}`);
+        } catch (renameErr) {
+          console.error(`Failed to rename ${dirPath} to ${newDirPath}:`, renameErr);
+        }
       }
     }
   }
@@ -52,7 +92,9 @@ async function main() {
     "node_modules/highlight.js/styles/default.css",
     "out/highlight.css"
   );
-  renameDirectoriesToLowerCase().catch(console.error);
+  await renameDirectoriesToLowerCase('./out').catch(err => {
+    console.error('An error occurred during directory renaming:', err);
+  });
 }
 
 async function compileAndWrite(markdownVFile) {
@@ -139,8 +181,12 @@ function fixLinks(html) {
               fixedPart = dir[i].replaceAll("-", " ")
               fixedLink = link[0].replace(dir[0], fixedPart);
             }
-            fixedLinks.push([link[0],fixedLink]);
+            if(fixedLink == undefined) {
+              continue
+            }
             console.log(fixedLink)
+            fixedLinks.push([link[0],fixedLink]);
+
           }
         }
       }
