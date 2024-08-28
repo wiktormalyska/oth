@@ -19,6 +19,7 @@ See [here](https://ulissemini.github.io/oth/) for a demo
 
 1. [Create a repo using the template](https://github.com/UlisseMini/oth/generate)
 2. Go to Settings -> Pages and set "deploy branch" to gh-pages and path to be the root `/`
+3. Set PHOTO_DIR env variable in actions to handle photos in notes (set to name of directory that contains photos)
 `
 
 ### Updates
