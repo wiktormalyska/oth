@@ -20,7 +20,9 @@ import {visit} from "unist-util-visit";
 main();
 
 function renameDirectoriesToLowercase(dirPath) {
+    var photoDir = process.env.PHOTO_DIR;
     const ignoreDirs = ['.git', '.github', 'fonts'];
+    if (photoDir != undefined) ignoreDirs.push(photoDir);
     // Read all items in the current directory
     const items = fs.readdirSync(dirPath);
 
