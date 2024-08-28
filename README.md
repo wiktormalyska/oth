@@ -1,6 +1,6 @@
 # oth (Obsidian To HTML)
 
-#Still in progress...
+# Still in progress...
 
 This is a template for publishing obsidian notes as a static site.
 The goal of the project is to stay minimal, but have enough features to showcase how you do things in the [unified](https://unifiedjs.com/) ecosystem.
