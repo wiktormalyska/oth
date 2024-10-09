@@ -1,5 +1,7 @@
 # oth (Obsidian To HTML)
 
+# Still in progress...
+
 This is a template for publishing obsidian notes as a static site.
 The goal of the project is to stay minimal, but have enough features to showcase how you do things in the [unified](https://unifiedjs.com/) ecosystem.
 
@@ -24,4 +26,10 @@ See [here](https://ulissemini.github.io/oth/) for a demo
 
 ### Updates
 
-1. Updated some npm packages
+1. Updated npm packages
+2. Fixed sub directories with " " beeing replaced with "-"
+3. Fixed sub directories that has uppercase letters beeing miss-redirected
+
+### Known issues
+
+1. Images in notes are not working
