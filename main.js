@@ -20,9 +20,7 @@ import {visit} from "unist-util-visit";
 main();
 
 function renameDirectoriesToLowercase(dirPath) {
-    var photoDir = process.env.PHOTO_DIR;
     const ignoreDirs = ['.git', '.github', 'fonts'];
-    if (photoDir != undefined) ignoreDirs.push(photoDir);
     // Read all items in the current directory
     const items = fs.readdirSync(dirPath);
 
@@ -97,7 +95,7 @@ async function compile(file) {
     if (file.path.includes("\\")) {
         file.path = file.path.replace(/\\/g, "/");
     }
-    var depth = file.path.split("/");
+    let depth = file.path.split("/");
     depth = depth.reverse();
     depth = depth.lastIndexOf("notes") - 1;
     const root = "../".repeat(depth);
@@ -128,64 +126,99 @@ async function compile(file) {
         .then((file) => {
             if (file.messages.length > 0)
                 console.error(reporter(file, {quiet: true}));
-            file = fixLinks(file);
+            file = fixWrongUrls(file);
             return file;
         });
 }
 
-function fixLinks(html) {
-    var text = html.value;
-    // Regular expression to a html tags
-    const regex = /<a [^>]*>/g;
-    var allLinks = Array.from(text.matchAll(regex));
-    var fixedLinks = [];
-    allLinks.forEach((link) => {
-        // Regular expression to extract link from a tag
-        const linkRegex = /(?<=href=")[^"]*(?=")/g
-        const href = Array.from(link[0].matchAll(linkRegex));
-        if (href) {
+function fixWrongUrls(html) {
+    let text = html.value;
+    const allALinks = extractLinks(text);
+    const fixedALinks = replacedLinksFix(allALinks, "href");
+    //Replace original html value with modified one
+    fixedALinks.forEach(link => {
+        if (link[1] != undefined) {
+            text = text.replace(link[0], link[1]);
+        }
+    })
+    html.value = text
+
+    const allImgLinks = extractImagesLinks(text);
+    const fixedImgLinks = replacedLinksFix(allImgLinks, "src");
+    fixedImgLinks.forEach(link => {
+        if (link[1] != undefined) {
+            text = text.replace(link[0], link[1]);
+        }
+    })
+    return html;
+}
+
+function extractImagesLinks(htmlValue) {
+    const regex = /<img [^>]*>/g;
+    return Array.from(htmlValue.matchAll(regex));
+}
+
+function extractUrlFromLink(link, attribute) {
+    // Regular expression to extract link from a tag
+    const linkRegex = new RegExp(`(?<=${attribute}=")[^"]*(?=")`, "g");
+    return Array.from(link[0].matchAll(linkRegex));
+}
+
+function replacedLinksFix(originalLinks, attribute) {
+    const fixedLinks = [];
+    originalLinks.forEach((link) => {
+        const urlFromLink = extractUrlFromLink(link,attribute);
+        if (urlFromLink) {
             // If link is not local link and if is in sub dir
-            if (!href[0][0].startsWith("http") && (href[0][0].includes("/") || href[0][0].includes("\\"))) {
-                const dir = href[0][0].split("/");
+            if (!urlFromLink[0][0].startsWith("http") &&
+                (urlFromLink[0][0].includes("/") || urlFromLink[0][0].includes("\\"))) {
+                const dir = urlFromLink[0][0].split("/");
                 if (dir.length > 1) {
                     //Scan every sub dir in url without file name
-                    var parts = []
-                    var fixedLink
-                    for (let i = 0; i < dir.length - 1; i++) {
-                        var fixedPart
-
-                        //Fix white spaces and big letters
-                        if (dir[i].includes("-")) {
-                            //Replace "-" with " "
-                            var part = dir[i]
-                            fixedPart = dir[i].replaceAll("-", " ")
-
-                            parts.push([part, fixedPart])
-                        }
-                    }
-                    for (let i = 0; i < parts.length; i++) {
-                        if (fixedLink == undefined) {
-                            fixedLink = link[0].replace(parts[i][0], parts[i][1])
-                        } else {
-                            fixedLink = fixedLink.replace(parts[i][0], parts[i][1])
-                        }
-                    }
-                    console.log(fixedLink)
+                    const parts = replaceCharsInDirectory(dir);
+                    let fixedLink = fixUrlByParts(link, parts)
                     fixedLinks.push([link[0], fixedLink]);
                 }
             }
 
         }
     });
-    //Replace original html value with modified one
-    fixedLinks.forEach(link => {
-        if (link[1] != undefined) {
-            text = text.replace(link[0], link[1]);
-        }
-    })
+    return fixedLinks;
+}
 
-    html.value = text
-    return html;
+function replaceCharsInDirectory(dir) {
+    const parts = [];
+    for (let i = 0; i < dir.length - 1; i++) {
+        let fixedPart;
+
+        //Fix white spaces and big letters
+        if (dir[i].includes("-")) {
+            //Replace "-" with " "
+            const part = dir[i];
+            fixedPart = dir[i].replaceAll("-", " ")
+
+            parts.push([part, fixedPart])
+        }
+    }
+    return parts;
+}
+
+function fixUrlByParts(link, parts) {
+    let fixedLink
+    for (let i = 0; i < parts.length; i++) {
+        if (fixedLink == undefined) {
+            fixedLink = link[0].replace(parts[i][0], parts[i][1])
+        } else {
+            fixedLink = fixedLink.replace(parts[i][0], parts[i][1])
+        }
+    }
+    return fixedLink
+}
+
+function extractLinks(htmlValue) {
+    // Regular expression to a html tags
+    const regex = /<a [^>]*>/g;
+    return Array.from(htmlValue.matchAll(regex));
 }
 
 function remarkRunCode() {
