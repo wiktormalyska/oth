@@ -41,13 +41,7 @@ function renameDirectoriesToLowercase(dirPath) {
 
             // Rename the directory if the name is different
             if (fullPath !== newFullPath) {
-                try {
-                    fs.renameSync(fullPath, newFullPath);
-                } catch (e)
-                {
-                    console.error("Error: "+e+"\n this might happen, when directories have the same name when renamed to lower case")
-                }
-
+                fs.renameSync(fullPath, newFullPath);
             }
 
             // Recursively process the renamed directory
@@ -143,7 +137,7 @@ function fixWrongUrls(html) {
     const fixedALinks = replacedLinksFix(allALinks, "href");
     //Replace original html value with modified one
     fixedALinks.forEach(link => {
-        if (link[1] !== undefined) {
+        if (link[1] != undefined) {
             text = text.replace(link[0], link[1]);
         }
     })
@@ -152,7 +146,7 @@ function fixWrongUrls(html) {
     const allImgLinks = extractImagesLinks(text);
     const fixedImgLinks = replacedLinksFix(allImgLinks, "src");
     fixedImgLinks.forEach(link => {
-        if (link[1] !== undefined) {
+        if (link[1] != undefined) {
             text = text.replace(link[0], link[1]);
         }
     })
@@ -205,16 +199,14 @@ function replaceCharsInDirectory(dir) {
 
             parts.push([part, fixedPart])
         }
-
     }
-    parts.push(dir.length-1)
     return parts;
 }
 
 function fixUrlByParts(link, parts) {
     let fixedLink
     for (let i = 0; i < parts.length; i++) {
-        if (fixedLink === undefined) {
+        if (fixedLink == undefined) {
             fixedLink = link[0].replace(parts[i][0], parts[i][1])
         } else {
             fixedLink = fixedLink.replace(parts[i][0], parts[i][1])

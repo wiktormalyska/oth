@@ -27,7 +27,7 @@
     "unified": "10.1.1",
     "unist-util-is": "6.0.0",
     "unist-util-visit": "5.0.0",
-    "vfile-reporter": "8.1.1",
-    "yarn": "^1.22.22"
+    "vfile-reporter": "8.1.1"
+    
   }
 }
