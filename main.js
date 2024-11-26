@@ -194,16 +194,13 @@ function replacedLinksFix(originalLinks, attribute) {
 function replaceCharsInDirectory(dir) {
     const parts = [];
     for (let i = 0; i < dir.length - 1; i++) {
-        let fixedPart;
-
+        let fixedPart = dir[i].toLowerCase();
         //Fix white spaces and big letters
-        if (dir[i].includes("-")) {
+        if (fixedPart.includes("-")) {
             //Replace "-" with " "
-            const part = dir[i];
-            fixedPart = dir[i].replaceAll("-", " ").toLowerCase()
-
-            parts.push([part, fixedPart])
+            fixedPart = fixedPart.replaceAll("-", " ")
         }
+        parts.push([dir[i], fixedPart])
     }
     parts.push([dir[dir.length-1],dir[dir.length-1].toLowerCase()+".html"])
     return parts;
