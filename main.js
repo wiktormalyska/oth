@@ -141,15 +141,17 @@ function fixWrongUrls(html) {
             text = text.replace(link[0], link[1]);
         }
     })
-    html.value = text
 
-    const allImgLinks = extractImagesLinks(text);
-    const fixedImgLinks = replacedLinksFix(allImgLinks, "src");
-    fixedImgLinks.forEach(link => {
-        if (link[1] != undefined) {
-            text = text.replace(link[0], link[1]);
-        }
-    })
+
+    // const allImgLinks = extractImagesLinks(text);
+    // const fixedImgLinks = replacedLinksFix(allImgLinks, "src");
+    // fixedImgLinks.forEach(link => {
+    //     if (link[1] != undefined) {
+    //         text = text.replace(link[0], link[1]);
+    //     }
+    // })
+
+    html.value = text
     return html;
 }
 
@@ -170,17 +172,20 @@ function replacedLinksFix(originalLinks, attribute) {
         const urlFromLink = extractUrlFromLink(link,attribute);
         if (urlFromLink) {
             // If link is not local link and if is in sub dir
-            if (!urlFromLink[0][0].startsWith("http") &&
-                (urlFromLink[0][0].includes("/") || urlFromLink[0][0].includes("\\"))) {
-                const dir = urlFromLink[0][0].split("/");
-                if (dir.length > 1) {
-                    //Scan every sub dir in url without file name
-                    const parts = replaceCharsInDirectory(dir);
-                    let fixedLink = fixUrlByParts(link, parts)
+            if (!urlFromLink[0][0].startsWith("http")) {
+                if (urlFromLink[0][0].includes("/") || urlFromLink[0][0].includes("\\")) {
+                    const dir = urlFromLink[0][0].split("/");
+                    if (dir.length > 1) {
+                        //Scan every sub dir in url without file name
+                        const parts = replaceCharsInDirectory(dir);
+                        let fixedLink = fixUrlByParts(link, parts)
+                        fixedLinks.push([link[0], fixedLink]);
+                    }
+                } else {
+                    let fixedLink = urlFromLink[0][0].toLowerCase()+".html"
                     fixedLinks.push([link[0], fixedLink]);
                 }
             }
-
         }
     });
     return fixedLinks;
@@ -195,11 +200,12 @@ function replaceCharsInDirectory(dir) {
         if (dir[i].includes("-")) {
             //Replace "-" with " "
             const part = dir[i];
-            fixedPart = dir[i].replaceAll("-", " ")
+            fixedPart = dir[i].replaceAll("-", " ").toLowerCase()
 
             parts.push([part, fixedPart])
         }
     }
+    parts.push([dir[dir.length-1],dir[dir.length-1].toLowerCase()+".html"])
     return parts;
 }
 
