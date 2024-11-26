@@ -182,7 +182,7 @@ function replacedLinksFix(originalLinks, attribute) {
                         fixedLinks.push([link[0], fixedLink]);
                     }
                 } else {
-                    let fixedLink = urlFromLink[0][0].toLowerCase()+".html"
+                    let fixedLink = "<a class=\"internal new\" href=\""+urlFromLink[0][0].toLowerCase()+".html"+"\">"
                     fixedLinks.push([link[0], fixedLink]);
                 }
             }
