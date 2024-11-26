@@ -34,7 +34,7 @@ function renameDirectoriesToLowercase(dirPath) {
                 return; // Skip this directory
             }
             // Get the lowercase version of the directory name
-            const lowerCaseName = item.toLowerCase();
+            const lowerCaseName = item.toLowerCase().replaceAll("-", " ");
 
             // Determine the new path after renaming
             const newFullPath = path.join(dirPath, lowerCaseName);
